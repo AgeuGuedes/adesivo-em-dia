@@ -1,11 +1,106 @@
-import { useState, useEffect } from 'react'
-import { CheckCircle, CalendarDays, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { CheckCircle, CalendarDays, ChevronRight, Clock, RotateCcw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { getNextPosition, POSITION_LABELS, POSITION_DAY, ROTATION_SEQUENCE } from '../lib/rotation'
 import BackDiagram from '../components/BackDiagram'
 
 const DAY_NAMES = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']
+
+function DayCircle({ day, color = 'blue', size = 'md' }) {
+  const sz  = size === 'lg' ? 'w-14 h-14 text-2xl' : size === 'sm' ? 'w-9 h-9 text-base' : 'w-11 h-11 text-lg'
+  const cls = color === 'red'
+    ? 'bg-red-500 border-red-600 text-white shadow-md'
+    : color === 'green'
+    ? 'bg-med-success border-green-700 text-white shadow-md'
+    : 'bg-med-primary border-blue-700 text-white shadow-md'
+  return (
+    <div className={`${sz} ${cls} rounded-full border-2 flex items-center justify-center font-black shrink-0`}>
+      {day}
+    </div>
+  )
+}
+
+function Countdown({ appliedAt }) {
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0, pct: 100 })
+
+  useEffect(() => {
+    const target = new Date(appliedAt).getTime() + 24 * 60 * 60 * 1000
+    function tick() {
+      const diff = Math.max(0, target - Date.now())
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      const pct = (diff / (24 * 60 * 60 * 1000)) * 100
+      setTime({ h, m, s, pct })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [appliedAt])
+
+  const urgent = time.h < 2
+  const color  = urgent ? 'text-red-500' : time.h < 6 ? 'text-amber-500' : 'text-med-primary'
+  const bar    = urgent ? 'bg-red-400' : time.h < 6 ? 'bg-amber-400' : 'bg-med-primary'
+  const pad    = n => String(n).padStart(2, '0')
+
+  return (
+    <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card">
+      <div className="flex items-center gap-2 mb-3">
+        <Clock size={16} className="text-med-muted"/>
+        <p className="text-med-muted text-sm font-semibold uppercase tracking-widest">
+          Próxima troca em
+        </p>
+      </div>
+      <div className={`text-4xl font-black tracking-tight text-center ${color}`}>
+        {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
+      </div>
+      <div className="mt-3 h-2.5 rounded-full bg-med-elevated overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${bar}`}
+          style={{ width: `${Math.max(0, time.pct)}%` }}
+        />
+      </div>
+      {urgent && (
+        <p className="text-red-500 text-sm font-semibold text-center mt-2">
+          Hora de trocar o adesivo em breve!
+        </p>
+      )}
+    </div>
+  )
+}
+
+function CountdownCompact({ appliedAt }) {
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
+
+  useEffect(() => {
+    const target = new Date(appliedAt).getTime() + 24 * 60 * 60 * 1000
+    function tick() {
+      const diff = Math.max(0, target - Date.now())
+      setTime({
+        h: Math.floor(diff / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+      })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [appliedAt])
+
+  const pad = n => String(n).padStart(2, '0')
+  const urgent = time.h < 2
+  const color  = urgent ? 'text-red-500' : time.h < 6 ? 'text-amber-500' : 'text-med-faint'
+
+  return (
+    <div className="text-right shrink-0">
+      <p className="text-med-faint text-xs uppercase tracking-widest">Faltam</p>
+      <p className={`font-mono font-bold text-base tabular-nums ${color}`}>
+        {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
+      </p>
+    </div>
+  )
+}
 
 function buildSchedule(startPos) {
   if (!startPos) return []
@@ -68,11 +163,11 @@ export default function Dashboard() {
     if (!nextPosition || !caregiver) return
     setConfirming(true)
     await supabase.from('applications').insert({
-      patient_id:  patient?.id,
+      patient_id:   patient?.id,
       caregiver_id: caregiver.id,
-      position:    nextPosition,
+      position:     nextPosition,
       observations: observations.trim() || null,
-      applied_at:  new Date().toISOString(),
+      applied_at:   new Date().toISOString(),
     })
     setObservations('')
     await loadData()
@@ -94,49 +189,84 @@ export default function Dashboard() {
 
   /* ── JÁ APLICADO HOJE ── */
   if (todayDone && todayRecord) {
-    const t       = new Date(todayRecord.applied_at)
-    const timeStr = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    const nextPos = getNextPosition(todayRecord.position)
+    const t        = new Date(todayRecord.applied_at)
+    const timeStr  = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const nextPos  = getNextPosition(todayRecord.position)
     const nextInfo = POSITION_LABELS[nextPos]
     const nextDay  = POSITION_DAY[nextPos]
     const recInfo  = POSITION_LABELS[todayRecord.position]
     const recDay   = POSITION_DAY[todayRecord.position]
+    const nextAppTime = new Date(t.getTime() + 24 * 60 * 60 * 1000)
+    const nextAppTimeStr = nextAppTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const nextAppDateStr = nextAppTime.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+    const nextAppDateCap = nextAppDateStr.charAt(0).toUpperCase() + nextAppDateStr.slice(1)
 
     return (
       <div className="p-5 max-w-lg mx-auto space-y-4 pb-28">
-        <div className="bg-med-surface rounded-3xl p-6 shadow-card2 border border-green-200 text-center">
-          <CheckCircle className="mx-auto mb-3 text-med-success" size={52} strokeWidth={1.5}/>
-          <h2 className="text-2xl font-bold text-med-success mb-1">Adesivo aplicado hoje!</h2>
-          <p className="text-med-muted text-base mb-4">{timeStr} · {todayRecord.caregivers?.name}</p>
 
-          <div className="bg-med-elevated rounded-2xl p-4 text-left border border-med-border">
-            <p className="text-med-muted text-xs uppercase tracking-widest mb-1">Local aplicado</p>
-            <p className="text-med-text text-2xl font-black">{recInfo?.label}</p>
-            <span className="inline-block mt-1 bg-med-primary-light text-med-primary text-sm font-bold px-3 py-1 rounded-full">
-              Dia {recDay} · {todayRecord.position}
-            </span>
+        {/* Header */}
+        <div className="bg-med-surface rounded-3xl p-5 border border-green-200 shadow-card2">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-med-success shrink-0" size={32} strokeWidth={1.8}/>
+            <div>
+              <h2 className="text-lg font-bold text-med-success leading-tight">Adesivo aplicado hoje!</h2>
+              <p className="text-med-muted text-sm">{timeStr} · {todayRecord.caregivers?.name}</p>
+            </div>
+          </div>
+          {/* Local aplicado inline */}
+          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-med-border">
+            <DayCircle day={recDay} color="red" size="sm"/>
+            <div>
+              <p className="text-med-faint text-xs uppercase tracking-widest">Local aplicado</p>
+              <p className="text-med-text font-bold leading-tight">{recInfo?.label}
+                <span className="ml-2 text-red-400 text-sm font-semibold">{todayRecord.position}</span>
+              </p>
+            </div>
           </div>
           {todayRecord.observations && (
-            <div className="mt-3 bg-med-elevated rounded-2xl p-4 text-left border border-med-border">
-              <p className="text-med-muted text-xs mb-1">Observações</p>
-              <p className="text-med-text italic">"{todayRecord.observations}"</p>
-            </div>
+            <p className="mt-3 text-med-faint text-sm italic border-t border-med-border pt-3">
+              "{todayRecord.observations}"
+            </p>
           )}
         </div>
 
-        <div className="bg-med-surface rounded-2xl p-4 flex items-center gap-3 shadow-card border border-med-border">
-          <ChevronRight className="text-med-faint shrink-0" size={20}/>
+        {/* Diagrama */}
+        <div className="bg-med-surface rounded-3xl py-4 px-3 shadow-card border border-med-border">
+          <BackDiagram appliedPosition={todayRecord.position}/>
+        </div>
+
+        {/* Próxima aplicação — card unificado */}
+        <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-4">
+          {/* Horário fixo — destaque principal */}
           <div>
-            <p className="text-med-muted text-sm">Próxima aplicação</p>
-            <p className="text-med-text font-bold text-lg">
-              {nextInfo?.label} · <span className="text-med-primary">Dia {nextDay}</span>
-            </p>
+            <p className="text-med-faint text-xs uppercase tracking-widest mb-1">Próxima aplicação</p>
+            <p className="text-med-text text-3xl font-black leading-none">{nextAppTimeStr}</p>
+            <p className="text-med-muted text-sm mt-1">{nextAppDateCap}</p>
+          </div>
+
+          {/* Divisor */}
+          <div className="border-t border-med-border"/>
+
+          {/* Local + cronômetro discreto */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <DayCircle day={nextDay} color="blue" size="sm"/>
+              <div>
+                <p className="text-med-faint text-xs uppercase tracking-widest">Local</p>
+                <p className="text-med-text font-bold leading-tight">{nextInfo?.label}
+                  <span className="ml-2 text-med-primary text-sm font-semibold">{nextPos}</span>
+                </p>
+              </div>
+            </div>
+            <CountdownCompact appliedAt={todayRecord.applied_at}/>
           </div>
         </div>
 
+        {/* Corrigir */}
         <button onClick={() => setTodayDone(false)}
-          className="w-full py-3 rounded-2xl border border-med-border text-med-muted text-base font-medium hover:bg-med-elevated transition-colors bg-med-surface shadow-card">
-          Ver detalhes / corrigir
+          className="w-full py-3 rounded-2xl border border-med-border text-med-muted text-sm font-medium hover:bg-med-elevated transition-colors bg-med-surface shadow-card flex items-center justify-center gap-2">
+          <RotateCcw size={14}/>
+          Corrigir aplicação
         </button>
       </div>
     )
@@ -163,13 +293,16 @@ export default function Dashboard() {
       </div>
 
       {/* Position highlight card */}
-      <div className="bg-med-primary rounded-3xl px-5 py-5 text-center shadow-card2">
-        <p className="text-blue-200 text-sm uppercase tracking-widest mb-1">Aplicar hoje em</p>
-        <p className="text-white text-3xl font-black leading-tight">{posInfo?.label}</p>
-        <div className="flex justify-center mt-2 gap-2">
-          <span className="bg-white/20 text-white text-base font-bold px-4 py-1.5 rounded-full">
-            Dia {dayNum} · {nextPosition}
-          </span>
+      <div className="bg-med-primary rounded-3xl px-5 py-5 shadow-card2">
+        <p className="text-blue-200 text-sm uppercase tracking-widest mb-3">Aplicar hoje em</p>
+        <div className="flex items-center gap-4">
+          <DayCircle day={dayNum} color="blue" size="lg"/>
+          <div>
+            <p className="text-white text-2xl font-black leading-tight">{posInfo?.label}</p>
+            <span className="inline-block mt-1 bg-white/20 text-white text-sm font-bold px-3 py-0.5 rounded-full">
+              {nextPosition}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -222,9 +355,7 @@ export default function Dashboard() {
             {schedule.map(({ dayName, day, month, position, dayNum, isToday }, i) => (
               <div key={i}
                 className={`shrink-0 w-[72px] rounded-2xl p-2.5 text-center border transition-colors shadow-card ${
-                  isToday
-                    ? 'bg-med-primary border-med-primary text-white'
-                    : 'bg-med-surface border-med-border'
+                  isToday ? 'bg-med-primary border-med-primary text-white' : 'bg-med-surface border-med-border'
                 }`}
               >
                 <p className={`text-xs font-bold uppercase ${isToday ? 'text-blue-200' : 'text-med-faint'}`}>{dayName}</p>

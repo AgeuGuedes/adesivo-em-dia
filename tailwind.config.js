@@ -29,6 +29,15 @@ export default {
         card2: '0 2px 12px rgba(0,0,0,0.10), 0 8px 24px rgba(0,0,0,0.06)',
         'blue-glow': '0 0 0 3px rgba(29,110,216,0.18)',
       },
+      keyframes: {
+        slideUp: {
+          '0%':   { transform: 'translateY(40px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)',    opacity: '1' },
+        },
+      },
+      animation: {
+        slideUp: 'slideUp 0.25s ease-out',
+      },
     },
   },
   plugins: [],

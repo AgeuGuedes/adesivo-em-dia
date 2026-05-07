@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import { User, UserPlus, Trash2, Save, ShieldCheck, RotateCcw, AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { POSITION_LABELS, POSITION_DAY } from '../lib/rotation'
+
+// Cliente isolado só para criar usuários — não interfere na sessão do admin
+const tempSupabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false } }
+)
 
 function Section({ title, icon: Icon, accent = 'blue', children }) {
   const border = accent === 'yellow' ? 'border-amber-200'
@@ -76,18 +84,8 @@ export default function Settings() {
   async function addCaregiver(e) {
     e.preventDefault(); setAddingCg(true)
 
-    // Salva sessão do admin antes do signUp substituir
-    const { data: { session: adminSession } } = await supabase.auth.getSession()
-
-    const { data: sd, error: se } = await supabase.auth.signUp({ email: newEmail, password: newPassword })
-
-    // Restaura sessão do admin imediatamente
-    if (adminSession) {
-      await supabase.auth.setSession({
-        access_token:  adminSession.access_token,
-        refresh_token: adminSession.refresh_token,
-      })
-    }
+    // Usa cliente isolado para não derrubar sessão do admin
+    const { data: sd, error: se } = await tempSupabase.auth.signUp({ email: newEmail, password: newPassword })
 
     if (se) { notify('Erro: ' + se.message, true); setAddingCg(false); return }
     if (sd?.user) {
@@ -175,7 +173,7 @@ export default function Settings() {
             <p className="text-med-muted text-sm font-semibold uppercase tracking-widest mb-3">Adicionar cuidadora</p>
             <form onSubmit={addCaregiver} className="space-y-3">
               {[
-                { label: 'Nome completo', val: newName,     set: setNewName,     type: 'text',     ph: 'Ex: Ana Paula' },
+                { label: 'Nome',          val: newName,     set: setNewName,     type: 'text',     ph: 'Ex: Ana Paula' },
                 { label: 'Email',         val: newEmail,    set: setNewEmail,    type: 'email',    ph: 'ana@email.com' },
                 { label: 'Senha',         val: newPassword, set: setNewPassword, type: 'password', ph: 'Mínimo 6 caracteres', min: 6 },
               ].map(({ label, val, set, type, ph, min }) => (

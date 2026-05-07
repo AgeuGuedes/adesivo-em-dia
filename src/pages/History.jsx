@@ -57,7 +57,10 @@ export default function History() {
                   <p className="text-med-text font-bold text-lg leading-tight">
                     {info?.label || rec.position}
                   </p>
-                  <div className="flex gap-2 mt-1 flex-wrap">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <div className="w-7 h-7 rounded-full bg-med-primary border-2 border-blue-700 flex items-center justify-center shrink-0">
+                      <span className="text-white text-xs font-black">{dayNum}</span>
+                    </div>
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-med-primary-light text-med-primary border border-blue-200">
                       Dia {dayNum} · {rec.position}
                     </span>
