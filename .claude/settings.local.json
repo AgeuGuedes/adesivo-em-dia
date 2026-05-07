@@ -4,7 +4,22 @@
       "Bash(npm create *)",
       "Bash(npx create-vite@latest . --template react --yes)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(not exist *)",
+      "Bash(vercel --version)",
+      "Bash(vercel --yes)",
+      "Bash(vercel env *)",
+      "Bash(vercel --prod)",
+      "Bash(vercel alias *)",
+      "Bash(vercel project *)",
+      "Bash(vercel --name adesivo-em-dia --yes)",
+      "Bash(npx vite *)",
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\ageu_\\\\adesivo-vovo\\\\public\\\\icon.png.jfif\" \"c:\\\\Users\\\\ageu_\\\\adesivo-vovo\\\\public\\\\icon.jpg\")",
+      "Bash(node process-icon.mjs)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Melhorias de UX/design: celebração, acessibilidade e polish visual *)"
     ]
   }
 }

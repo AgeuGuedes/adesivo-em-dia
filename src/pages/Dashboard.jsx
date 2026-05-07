@@ -201,7 +201,7 @@ export default function Dashboard() {
             </div>
           </div>
           {todayRecord.observations && (
-            <p className="mt-3 text-green-700 text-sm italic border-t border-green-200 pt-3">
+            <p className="mt-3 text-green-700 text-sm italic border-t border-green-200 pt-3 break-words">
               "{todayRecord.observations}"
             </p>
           )}

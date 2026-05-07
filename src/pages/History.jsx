@@ -85,7 +85,7 @@ export default function History() {
               {rec.observations && (
                 <div className="flex items-start gap-1.5 mt-2 text-med-faint text-sm italic">
                   <MessageSquare size={13} className="mt-0.5 shrink-0"/>
-                  <span>"{rec.observations}"</span>
+                  <span className="break-words min-w-0">"{rec.observations}"</span>
                 </div>
               )}
             </div>

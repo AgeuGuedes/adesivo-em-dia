@@ -1,34 +1,36 @@
 import { useState } from 'react'
 import { POSITION_DAY, POSITION_LABELS } from '../lib/rotation'
 
+// Columns moved inward (78/118/182/222) so all circles stay inside the body.
+// Lower torso path widened (+20 px each side from y=253 down) to accommodate.
 const CIRCLES = {
-  ES1: { cx: 75,  cy: 160 }, ES2: { cx: 112, cy: 160 },
-  EM1: { cx: 78,  cy: 247 }, EM2: { cx: 115, cy: 247 },
-  EI1: { cx: 82,  cy: 328 }, EI2: { cx: 119, cy: 328 },
-  DS1: { cx: 188, cy: 160 }, DS2: { cx: 225, cy: 160 },
-  DM1: { cx: 185, cy: 247 }, DM2: { cx: 222, cy: 247 },
-  DI1: { cx: 181, cy: 328 }, DI2: { cx: 218, cy: 328 },
+  ES1: { cx: 78,  cy: 163 }, ES2: { cx: 118, cy: 163 },
+  EM1: { cx: 78,  cy: 251 }, EM2: { cx: 118, cy: 251 },
+  EI1: { cx: 78,  cy: 333 }, EI2: { cx: 118, cy: 333 },
+  DS1: { cx: 182, cy: 163 }, DS2: { cx: 222, cy: 163 },
+  DM1: { cx: 182, cy: 251 }, DM2: { cx: 222, cy: 251 },
+  DI1: { cx: 182, cy: 333 }, DI2: { cx: 222, cy: 333 },
 }
 
-const R = 16
+const R = 18
 
 export default function BackDiagram({ activePosition, appliedPosition }) {
   const [tooltip, setTooltip] = useState(null)
 
-  function handleClick(pos, cx, cy) {
+  function handleClick(pos) {
     if (pos !== appliedPosition) return
     setTooltip(t => t === pos ? null : pos)
     setTimeout(() => setTooltip(null), 2500)
   }
 
-  const tooltipPos = tooltip ? CIRCLES[tooltip] : null
+  const tooltipPos   = tooltip ? CIRCLES[tooltip] : null
   const tooltipLabel = tooltip ? POSITION_LABELS[tooltip]?.label : null
 
   return (
     <svg
-      viewBox="0 0 300 430"
+      viewBox="0 0 300 450"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full max-w-[300px] mx-auto"
+      className="w-full max-w-[340px] mx-auto"
       aria-label="Diagrama das costas"
     >
       <defs>
@@ -59,25 +61,25 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
       <path d="M 140 82 C 138 91 136 103 136 111 L 164 111 C 164 103 162 91 160 82 Z"
         fill="#ccd8ec" stroke="#b0c4de" strokeWidth="1"/>
 
-      {/* Torso */}
+      {/* Torso — lower section widened 20 px per side so all circles stay inside */}
       <path d="
         M 136 110
         C 108 113, 57 127, 37 155
         C 25 171, 24 192, 24 210
         L 24 227
-        C 24 243, 40 252, 62 253
-        L 65 253
-        L 68 315
-        C 68 332, 72 343, 77 349
-        L 78 371
-        C 78 385, 94 392, 111 392
-        L 189 392
-        C 206 392, 222 385, 222 371
-        L 223 349
-        C 228 343, 232 332, 232 315
-        L 235 253
-        L 238 253
-        C 260 252, 276 243, 276 227
+        C 24 243, 30 252, 46 253
+        L 48 253
+        L 50 315
+        C 50 332, 55 343, 60 349
+        L 61 371
+        C 61 385, 77 392, 94 392
+        L 206 392
+        C 223 392, 239 385, 239 371
+        L 240 349
+        C 245 343, 250 332, 250 315
+        L 252 253
+        L 254 253
+        C 270 252, 276 243, 276 227
         L 276 210
         C 276 192, 275 171, 263 155
         C 243 127, 192 113, 164 110
@@ -93,53 +95,51 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
         stroke="#9eb4cc" strokeWidth="1.2" strokeDasharray="5,5" opacity="0.6"/>
 
       {/* Horizontal dividers */}
-      {[204, 283].map(y => (
-        <line key={y} x1="63" y1={y} x2="237" y2={y}
+      {[207, 287].map(y => (
+        <line key={y} x1="50" y1={y} x2="250" y2={y}
           stroke="#9eb4cc" strokeWidth="1" strokeDasharray="5,5" opacity="0.5"/>
       ))}
 
       {/* Row labels */}
       {[
-        { x: 150, y: 127, t: 'SUPERIOR' },
-        { x: 150, y: 216, t: 'MEIO' },
-        { x: 150, y: 295, t: 'INFERIOR' },
+        { x: 150, y: 128, t: 'SUPERIOR' },
+        { x: 150, y: 220, t: 'MEIO' },
+        { x: 150, y: 300, t: 'INFERIOR' },
       ].map(({ x, y, t }) => (
-        <text key={t} x={x} y={y} textAnchor="middle" fontSize="8.5"
+        <text key={t} x={x} y={y} textAnchor="middle" fontSize="10"
           fontFamily="system-ui" letterSpacing="2"
           fill="#8fa8c2" fontWeight="700">{t}</text>
       ))}
 
       {/* ESQ / DIR */}
-      <text x="68"  y="408" textAnchor="middle" fontSize="11"
-        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="600">← ESQ</text>
-      <text x="232" y="408" textAnchor="middle" fontSize="11"
-        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="600">DIR →</text>
+      <text x="78"  y="420" textAnchor="middle" fontSize="13"
+        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="700">← ESQ</text>
+      <text x="222" y="420" textAnchor="middle" fontSize="13"
+        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="700">DIR →</text>
 
       {/* Circles */}
       {Object.entries(CIRCLES).map(([pos, { cx, cy }]) => {
-        const isActive   = pos === activePosition
-        const isApplied  = pos === appliedPosition
-        const day        = POSITION_DAY[pos]
+        const isActive  = pos === activePosition
+        const isApplied = pos === appliedPosition
+        const day       = POSITION_DAY[pos]
 
         return (
           <g key={pos} style={{ cursor: isApplied ? 'pointer' : 'default' }}
-            onClick={() => handleClick(pos, cx, cy)}>
+            onClick={() => handleClick(pos)}>
 
-            {/* Pulse ring */}
             {isActive && (
               <circle cx={cx} cy={cy} r={R + 2} fill="#1d6ed8" opacity="0.4">
-                <animate attributeName="r"       values={`${R+2};${R+14};${R+2}`} dur="2s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.4;0;0.4"              dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="r"       values={`${R+2};${R+10};${R+2}`} dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.4;0;0.4"               dur="2s" repeatCount="indefinite"/>
               </circle>
             )}
             {isApplied && (
               <circle cx={cx} cy={cy} r={R + 2} fill="#ef4444" opacity="0.35">
                 <animate attributeName="r"       values={`${R+2};${R+10};${R+2}`} dur="2.5s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.35;0;0.35"             dur="2.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.35;0;0.35"              dur="2.5s" repeatCount="indefinite"/>
               </circle>
             )}
 
-            {/* Circle fill */}
             <circle
               cx={cx} cy={cy} r={R}
               fill={isApplied ? '#ef4444' : isActive ? '#1d6ed8' : '#ffffff'}
@@ -148,18 +148,16 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
               filter={isApplied ? 'url(#glowRed)' : isActive ? 'url(#glowBlue)' : undefined}
             />
 
-            {/* Day number */}
             <text x={cx} y={cy + 6} textAnchor="middle"
-              fontSize={isApplied || isActive ? '14' : '13'}
+              fontSize={isApplied || isActive ? '15' : '14'}
               fontWeight="900" fontFamily="system-ui"
-              fill={isApplied || isActive ? '#ffffff' : '#64748b'}>
+              fill={isApplied || isActive ? '#ffffff' : '#4a6080'}>
               {day}
             </text>
 
-            {/* Position code */}
-            <text x={cx} y={cy + R + 12} textAnchor="middle"
-              fontSize="7" fontWeight="600" fontFamily="system-ui"
-              fill={isApplied ? '#ef4444' : isActive ? '#1d6ed8' : '#94a3b8'}>
+            <text x={cx} y={cy + R + 14} textAnchor="middle"
+              fontSize="9.5" fontWeight="700" fontFamily="system-ui"
+              fill={isApplied ? '#ef4444' : isActive ? '#1d6ed8' : '#7a96b0'}>
               {pos}
             </text>
           </g>

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { User, UserPlus, Trash2, Save, ShieldCheck, RotateCcw, AlertTriangle } from 'lucide-react'
+import { User, UserPlus, Trash2, Save } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { POSITION_LABELS, POSITION_DAY } from '../lib/rotation'
 
 // Cliente isolado só para criar usuários — não interfere na sessão do admin
 const tempSupabase = createClient(
@@ -43,7 +42,6 @@ export default function Settings() {
   const [patient, setPatient]               = useState(null)
   const [patientName, setPatientName]       = useState('')
   const [caregivers, setCaregivers]         = useState([])
-  const [recentRecords, setRecentRecords]   = useState([])
   const [newName, setNewName]               = useState('')
   const [newEmail, setNewEmail]             = useState('')
   const [newPassword, setNewPassword]       = useState('')
@@ -63,15 +61,13 @@ export default function Settings() {
   }
 
   async function loadData() {
-    const [{ data: pat }, { data: cgs }, { data: recs }] = await Promise.all([
+    const [{ data: pat }, { data: cgs }] = await Promise.all([
       supabase.from('patients').select('*').limit(1).maybeSingle(),
       supabase.from('caregivers').select('*').order('name'),
-      supabase.from('applications').select('*, caregivers(name)').order('applied_at', { ascending: false }).limit(10),
     ])
     setPatient(pat)
     setPatientName(pat?.name || '')
     setCaregivers(cgs || [])
-    setRecentRecords(recs || [])
   }
 
   async function savePatient(e) {
@@ -100,25 +96,6 @@ export default function Settings() {
     if (!window.confirm('Remover cuidadora?')) return
     await supabase.from('caregivers').delete().eq('id', id)
     await loadData(); notify('Cuidadora removida.')
-  }
-
-  async function deleteRecord(id) {
-    await supabase.from('applications').delete().eq('id', id)
-    await loadData(); notify('Registro removido.')
-  }
-
-  async function deleteLastRecord() {
-    if (!recentRecords[0]) return notify('Nenhum registro.', true)
-    if (!window.confirm('Remover última confirmação?')) return
-    await supabase.from('applications').delete().eq('id', recentRecords[0].id)
-    await loadData(); notify('Última confirmação removida.')
-  }
-
-  async function deleteAllRecords() {
-    if (!window.confirm('⚠️ APAGAR TODOS os registros?\n\nO rodízio volta ao dia 1. Só use em testes!')) return
-    if (!window.confirm('Tem certeza absoluta?')) return
-    await supabase.from('applications').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await loadData(); notify('Todos os registros apagados. Rodízio resetado para o Dia 1.')
   }
 
   const inputCls = "w-full bg-med-elevated border border-med-border rounded-2xl px-4 py-4 text-med-text text-lg focus:outline-none focus:border-med-primary focus:shadow-blue-glow transition-all placeholder:text-med-faint"
@@ -150,10 +127,12 @@ export default function Settings() {
             <div className="space-y-2 mb-5">
               {caregivers.map(cg => (
                 <div key={cg.id} className="flex items-center justify-between bg-med-elevated rounded-2xl px-4 py-3 border border-med-border">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-med-text font-semibold text-lg">{cg.name}</p>
-                    <p className="text-med-faint text-sm">
-                      {(isAdmin || !cg.is_admin) ? cg.email + ' · ' : ''}
+                    {(isAdmin || !cg.is_admin) && (
+                      <p className="text-med-faint text-sm truncate">{cg.email}</p>
+                    )}
+                    <p className="text-med-faint text-xs mt-0.5">
                       {cg.is_admin ? 'Administrador' : 'Cuidadora'}
                     </p>
                   </div>
@@ -194,54 +173,6 @@ export default function Settings() {
         )}
       </Section>
 
-      {/* Admin Panel */}
-      {isAdmin && (
-        <Section title="Painel Admin" icon={ShieldCheck} accent="yellow">
-          <p className="text-med-muted text-sm mb-4 bg-amber-50 rounded-xl p-3 border border-amber-100">
-            Somente você vê esta seção. Use para corrigir registros durante testes.
-          </p>
-          <div className="space-y-3 mb-5">
-            <button onClick={deleteLastRecord}
-              className="flex items-center gap-3 w-full bg-med-elevated hover:bg-amber-50 border border-med-border rounded-2xl px-4 py-4 text-med-text font-semibold text-base transition-colors">
-              <RotateCcw size={18} className="text-amber-600 shrink-0"/>
-              Desfazer última confirmação
-            </button>
-            <button onClick={deleteAllRecords}
-              className="flex items-center gap-3 w-full bg-med-danger-light hover:bg-red-100 border border-red-200 rounded-2xl px-4 py-4 text-med-danger font-semibold text-base transition-colors">
-              <AlertTriangle size={18} className="shrink-0"/>
-              Apagar TODOS os registros (reset Dia 1)
-            </button>
-          </div>
-
-          {recentRecords.length > 0 && (
-            <div>
-              <p className="text-med-muted text-sm font-semibold uppercase tracking-widest mb-3">Últimos registros</p>
-              <div className="space-y-2">
-                {recentRecords.map((rec, i) => {
-                  const d    = new Date(rec.applied_at)
-                  const date = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-                  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-                  const day  = POSITION_DAY[rec.position]
-                  return (
-                    <div key={rec.id} className="flex items-center justify-between bg-med-elevated rounded-xl px-3 py-2.5 border border-med-border">
-                      <div>
-                        <span className={`text-sm font-bold ${i === 0 ? 'text-med-primary' : 'text-med-muted'}`}>
-                          Dia {day} · {rec.position}
-                        </span>
-                        <span className="text-med-faint text-xs ml-2">{date} {time} · {rec.caregivers?.name || '?'}</span>
-                      </div>
-                      <button onClick={() => deleteRecord(rec.id)}
-                        className="p-1.5 rounded-lg text-med-faint hover:text-med-danger hover:bg-med-danger-light transition-colors ml-2">
-                        <Trash2 size={15}/>
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </Section>
-      )}
 
       <Toast msg={msg}   type="success"/>
       <Toast msg={error} type="error"/>

@@ -3,3 +3,10 @@ dist
 .env
 .env.local
 .env.*.local
+
+.vercel
+
+# imagens temporárias de ícone
+public/icon.jpg
+public/icon.png
+public/icon.png.jfif
