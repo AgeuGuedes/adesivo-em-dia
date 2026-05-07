@@ -18,16 +18,16 @@ const NAV_ITEMS = [
 function TopBar() {
   const { caregiver } = useAuth()
   return (
-    <header className="bg-med-surface border-b border-med-border px-5 py-3 shadow-card">
+    <header className="bg-med-surface border-b border-med-border px-5 py-4 shadow-card">
       <div className="max-w-lg mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <img src="/icon2.png" alt="" className="w-8 h-8 rounded-xl object-cover"/>
-          <span className="text-med-text font-bold text-lg tracking-tight">Adesivo em Dia</span>
+        <div className="flex items-center gap-3">
+          <img src="/icon2.png" alt="" className="w-9 h-9 rounded-xl object-cover shadow-card"/>
+          <span className="text-med-text font-black text-xl tracking-tight">Adesivo em Dia</span>
         </div>
         {caregiver && (
           <div className="text-right">
-            <p className="text-med-faint text-xs">Olá,</p>
-            <p className="text-med-muted text-sm font-semibold leading-tight">{caregiver.name}</p>
+            <p className="text-med-faint text-xs font-medium">Olá,</p>
+            <p className="text-med-text text-base font-bold leading-tight">{caregiver.name}</p>
           </div>
         )}
       </div>
@@ -86,14 +86,14 @@ function BottomNav() {
           {NAV_ITEMS.map(({ to, label, Icon }) => (
             <NavLink key={to} to={to} end={to === '/'}
               className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 py-3 text-xs font-semibold transition-colors ${
+                `flex-1 flex flex-col items-center justify-center gap-1.5 py-4 text-xs font-bold transition-colors ${
                   isActive ? 'text-med-primary' : 'text-med-faint'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={22} strokeWidth={isActive ? 2.2 : 1.6}/>
+                  <Icon size={24} strokeWidth={isActive ? 2.4 : 1.6}/>
                   <span>{label}</span>
                 </>
               )}
@@ -102,22 +102,22 @@ function BottomNav() {
           {isAdmin && (
             <NavLink to="/admin"
               className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 py-3 text-xs font-semibold transition-colors ${
+                `flex-1 flex flex-col items-center justify-center gap-1.5 py-4 text-xs font-bold transition-colors ${
                   isActive ? 'text-amber-600' : 'text-med-faint'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <ShieldCheck size={22} strokeWidth={isActive ? 2.2 : 1.6}/>
+                  <ShieldCheck size={24} strokeWidth={isActive ? 2.4 : 1.6}/>
                   <span>Admin</span>
                 </>
               )}
             </NavLink>
           )}
           <button onClick={() => setShowLogout(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-1 py-3 text-xs font-semibold text-med-faint hover:text-med-danger transition-colors">
-            <LogOut size={22} strokeWidth={1.6}/>
+            className="flex-1 flex flex-col items-center justify-center gap-1.5 py-4 text-xs font-bold text-med-faint hover:text-med-danger transition-colors active:scale-95">
+            <LogOut size={24} strokeWidth={1.6}/>
             <span>Sair</span>
           </button>
         </div>

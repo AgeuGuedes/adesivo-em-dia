@@ -1,71 +1,22 @@
-import { useState, useEffect, useRef } from 'react'
-import { CheckCircle, CalendarDays, ChevronRight, Clock, RotateCcw } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CheckCircle, CalendarDays, Clock, RotateCcw } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { getNextPosition, POSITION_LABELS, POSITION_DAY, ROTATION_SEQUENCE } from '../lib/rotation'
+import { getNextPosition, POSITION_LABELS, POSITION_DAY } from '../lib/rotation'
 import BackDiagram from '../components/BackDiagram'
 
 const DAY_NAMES = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']
 
-function DayCircle({ day, color = 'blue', size = 'md' }) {
-  const sz  = size === 'lg' ? 'w-14 h-14 text-2xl' : size === 'sm' ? 'w-9 h-9 text-base' : 'w-11 h-11 text-lg'
+function DayCircle({ day, color = 'blue', size = 'md', ring = false }) {
+  const sz  = size === 'lg' ? 'w-14 h-14 text-2xl' : size === 'sm' ? 'w-10 h-10 text-base' : 'w-12 h-12 text-lg'
   const cls = color === 'red'
-    ? 'bg-red-500 border-red-600 text-white shadow-md'
+    ? 'bg-red-500 border-red-700 text-white shadow-md'
     : color === 'green'
     ? 'bg-med-success border-green-700 text-white shadow-md'
     : 'bg-med-primary border-blue-700 text-white shadow-md'
   return (
-    <div className={`${sz} ${cls} rounded-full border-2 flex items-center justify-center font-black shrink-0`}>
+    <div className={`${sz} ${cls} rounded-full border-2 flex items-center justify-center font-black shrink-0 ${ring ? 'ring-2 ring-white ring-offset-1 ring-offset-med-primary' : ''}`}>
       {day}
-    </div>
-  )
-}
-
-function Countdown({ appliedAt }) {
-  const [time, setTime] = useState({ h: 0, m: 0, s: 0, pct: 100 })
-
-  useEffect(() => {
-    const target = new Date(appliedAt).getTime() + 24 * 60 * 60 * 1000
-    function tick() {
-      const diff = Math.max(0, target - Date.now())
-      const h = Math.floor(diff / 3600000)
-      const m = Math.floor((diff % 3600000) / 60000)
-      const s = Math.floor((diff % 60000) / 1000)
-      const pct = (diff / (24 * 60 * 60 * 1000)) * 100
-      setTime({ h, m, s, pct })
-    }
-    tick()
-    const id = setInterval(tick, 1000)
-    return () => clearInterval(id)
-  }, [appliedAt])
-
-  const urgent = time.h < 2
-  const color  = urgent ? 'text-red-500' : time.h < 6 ? 'text-amber-500' : 'text-med-primary'
-  const bar    = urgent ? 'bg-red-400' : time.h < 6 ? 'bg-amber-400' : 'bg-med-primary'
-  const pad    = n => String(n).padStart(2, '0')
-
-  return (
-    <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card">
-      <div className="flex items-center gap-2 mb-3">
-        <Clock size={16} className="text-med-muted"/>
-        <p className="text-med-muted text-sm font-semibold uppercase tracking-widest">
-          Próxima troca em
-        </p>
-      </div>
-      <div className={`text-4xl font-black tracking-tight text-center ${color}`}>
-        {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
-      </div>
-      <div className="mt-3 h-2.5 rounded-full bg-med-elevated overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${bar}`}
-          style={{ width: `${Math.max(0, time.pct)}%` }}
-        />
-      </div>
-      {urgent && (
-        <p className="text-red-500 text-sm font-semibold text-center mt-2">
-          Hora de trocar o adesivo em breve!
-        </p>
-      )}
     </div>
   )
 }
@@ -88,15 +39,33 @@ function CountdownCompact({ appliedAt }) {
     return () => clearInterval(id)
   }, [appliedAt])
 
-  const pad = n => String(n).padStart(2, '0')
+  const pad    = n => String(n).padStart(2, '0')
   const urgent = time.h < 2
   const color  = urgent ? 'text-red-500' : time.h < 6 ? 'text-amber-500' : 'text-med-faint'
 
   return (
     <div className="text-right shrink-0">
-      <p className="text-med-faint text-xs uppercase tracking-widest">Faltam</p>
-      <p className={`font-mono font-bold text-base tabular-nums ${color}`}>
+      <p className="text-med-faint text-xs uppercase tracking-widest mb-0.5">Faltam</p>
+      <p className={`font-mono font-bold text-lg tabular-nums ${color}`}>
         {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
+      </p>
+    </div>
+  )
+}
+
+function CelebrationOverlay() {
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-med-success">
+      <div className="animate-scaleIn">
+        <div className="w-36 h-36 rounded-full bg-white/20 flex items-center justify-center">
+          <CheckCircle size={88} className="text-white" strokeWidth={1.4}/>
+        </div>
+      </div>
+      <p className="text-white text-3xl font-black mt-7 animate-fadeUpD1 tracking-tight">
+        Adesivo aplicado!
+      </p>
+      <p className="text-green-100 text-lg mt-2 animate-fadeUpD2">
+        Registrado com sucesso
       </p>
     </div>
   )
@@ -129,6 +98,7 @@ export default function Dashboard() {
   const [lastApplication, setLastApplication] = useState(null)
   const [observations, setObservations] = useState('')
   const [confirming, setConfirming]     = useState(false)
+  const [celebrating, setCelebrating]   = useState(false)
   const [todayDone, setTodayDone]       = useState(false)
   const [todayRecord, setTodayRecord]   = useState(null)
   const [loading, setLoading]           = useState(true)
@@ -143,8 +113,7 @@ export default function Dashboard() {
     ])
     setPatient(pat)
     setLastApplication(last)
-    const next = getNextPosition(last?.position)
-    setNextPosition(next)
+    setNextPosition(getNextPosition(last?.position))
 
     const today = new Date().toISOString().split('T')[0]
     const { data: todayApp } = await supabase
@@ -170,13 +139,19 @@ export default function Dashboard() {
       applied_at:   new Date().toISOString(),
     })
     setObservations('')
-    await loadData()
-    setConfirming(false)
+    setCelebrating(true)
+    setTimeout(async () => {
+      await loadData()
+      setCelebrating(false)
+      setConfirming(false)
+    }, 2200)
   }
+
+  if (celebrating) return <CelebrationOverlay/>
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-8 h-8 rounded-full border-2 border-med-primary border-t-transparent animate-spin"/>
+      <div className="w-10 h-10 rounded-full border-[3px] border-med-primary border-t-transparent animate-spin"/>
     </div>
   )
 
@@ -189,42 +164,44 @@ export default function Dashboard() {
 
   /* ── JÁ APLICADO HOJE ── */
   if (todayDone && todayRecord) {
-    const t        = new Date(todayRecord.applied_at)
-    const timeStr  = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    const nextPos  = getNextPosition(todayRecord.position)
-    const nextInfo = POSITION_LABELS[nextPos]
-    const nextDay  = POSITION_DAY[nextPos]
-    const recInfo  = POSITION_LABELS[todayRecord.position]
-    const recDay   = POSITION_DAY[todayRecord.position]
-    const nextAppTime = new Date(t.getTime() + 24 * 60 * 60 * 1000)
+    const t              = new Date(todayRecord.applied_at)
+    const timeStr        = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const nextPos        = getNextPosition(todayRecord.position)
+    const nextInfo       = POSITION_LABELS[nextPos]
+    const nextDay        = POSITION_DAY[nextPos]
+    const recInfo        = POSITION_LABELS[todayRecord.position]
+    const recDay         = POSITION_DAY[todayRecord.position]
+    const nextAppTime    = new Date(t.getTime() + 24 * 60 * 60 * 1000)
     const nextAppTimeStr = nextAppTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     const nextAppDateStr = nextAppTime.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
     const nextAppDateCap = nextAppDateStr.charAt(0).toUpperCase() + nextAppDateStr.slice(1)
 
     return (
-      <div className="p-5 max-w-lg mx-auto space-y-4 pb-28">
+      <div className="p-5 max-w-lg mx-auto space-y-4 pb-28 animate-fadeIn">
 
-        {/* Header */}
-        <div className="bg-med-surface rounded-3xl p-5 border border-green-200 shadow-card2">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="text-med-success shrink-0" size={32} strokeWidth={1.8}/>
+        {/* Confirmação */}
+        <div className="bg-green-50 rounded-3xl p-5 border border-green-200 shadow-card2">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-med-success flex items-center justify-center shrink-0 shadow-md">
+              <CheckCircle size={30} className="text-white" strokeWidth={2}/>
+            </div>
             <div>
-              <h2 className="text-lg font-bold text-med-success leading-tight">Adesivo aplicado hoje!</h2>
-              <p className="text-med-muted text-sm">{timeStr} · {todayRecord.caregivers?.name}</p>
+              <h2 className="text-xl font-black text-med-success leading-tight">Adesivo aplicado!</h2>
+              <p className="text-green-700 text-base mt-0.5">{timeStr} · {todayRecord.caregivers?.name}</p>
             </div>
           </div>
-          {/* Local aplicado inline */}
-          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-med-border">
+          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-green-200">
             <DayCircle day={recDay} color="red" size="sm"/>
             <div>
-              <p className="text-med-faint text-xs uppercase tracking-widest">Local aplicado</p>
-              <p className="text-med-text font-bold leading-tight">{recInfo?.label}
+              <p className="text-green-600 text-xs uppercase tracking-widest font-semibold">Local aplicado</p>
+              <p className="text-med-text font-bold text-lg leading-tight">
+                {recInfo?.label}
                 <span className="ml-2 text-red-400 text-sm font-semibold">{todayRecord.position}</span>
               </p>
             </div>
           </div>
           {todayRecord.observations && (
-            <p className="mt-3 text-med-faint text-sm italic border-t border-med-border pt-3">
+            <p className="mt-3 text-green-700 text-sm italic border-t border-green-200 pt-3">
               "{todayRecord.observations}"
             </p>
           )}
@@ -236,24 +213,20 @@ export default function Dashboard() {
         </div>
 
         {/* Próxima aplicação — card unificado */}
-        <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-4">
-          {/* Horário fixo — destaque principal */}
+        <div className="bg-med-surface rounded-3xl p-6 border border-med-border shadow-card space-y-4">
           <div>
-            <p className="text-med-faint text-xs uppercase tracking-widest mb-1">Próxima aplicação</p>
-            <p className="text-med-text text-3xl font-black leading-none">{nextAppTimeStr}</p>
-            <p className="text-med-muted text-sm mt-1">{nextAppDateCap}</p>
+            <p className="text-med-faint text-xs uppercase tracking-widest mb-1 font-semibold">Próxima aplicação</p>
+            <p className="text-med-text text-4xl font-black leading-none tracking-tight">{nextAppTimeStr}</p>
+            <p className="text-med-muted text-base mt-1.5">{nextAppDateCap}</p>
           </div>
-
-          {/* Divisor */}
           <div className="border-t border-med-border"/>
-
-          {/* Local + cronômetro discreto */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <DayCircle day={nextDay} color="blue" size="sm"/>
               <div>
-                <p className="text-med-faint text-xs uppercase tracking-widest">Local</p>
-                <p className="text-med-text font-bold leading-tight">{nextInfo?.label}
+                <p className="text-med-faint text-xs uppercase tracking-widest font-semibold">Local</p>
+                <p className="text-med-text font-bold text-lg leading-tight">
+                  {nextInfo?.label}
                   <span className="ml-2 text-med-primary text-sm font-semibold">{nextPos}</span>
                 </p>
               </div>
@@ -264,8 +237,8 @@ export default function Dashboard() {
 
         {/* Corrigir */}
         <button onClick={() => setTodayDone(false)}
-          className="w-full py-3 rounded-2xl border border-med-border text-med-muted text-sm font-medium hover:bg-med-elevated transition-colors bg-med-surface shadow-card flex items-center justify-center gap-2">
-          <RotateCcw size={14}/>
+          className="w-full py-4 rounded-2xl border border-med-border text-med-muted text-base font-semibold hover:bg-med-elevated transition-colors bg-med-surface shadow-card flex items-center justify-center gap-2 active:scale-[0.98]">
+          <RotateCcw size={16}/>
           Corrigir aplicação
         </button>
       </div>
@@ -274,32 +247,32 @@ export default function Dashboard() {
 
   /* ── TELA PRINCIPAL ── */
   return (
-    <div className="p-5 max-w-lg mx-auto space-y-4 pb-28">
+    <div className="p-5 max-w-lg mx-auto space-y-4 pb-28 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between py-1">
         <div>
-          {patient && <p className="text-med-text font-bold text-xl leading-tight">{patient.name}</p>}
-          <p className="text-med-muted text-sm mt-0.5">{todayCap}</p>
+          {patient && <p className="text-med-text font-black text-2xl leading-tight">{patient.name}</p>}
+          <p className="text-med-muted text-base mt-0.5">{todayCap}</p>
         </div>
         {lastApplication && (
-          <div className="text-right">
-            <p className="text-med-faint text-xs uppercase tracking-wider">Último</p>
-            <p className="text-med-muted text-sm font-semibold">
+          <div className="text-right bg-med-surface border border-med-border rounded-2xl px-3 py-2 shadow-card">
+            <p className="text-med-faint text-xs uppercase tracking-wider font-semibold">Último</p>
+            <p className="text-med-text text-sm font-bold mt-0.5">
               Dia {POSITION_DAY[lastApplication.position]} · {lastApplication.position}
             </p>
           </div>
         )}
       </div>
 
-      {/* Position highlight card */}
-      <div className="bg-med-primary rounded-3xl px-5 py-5 shadow-card2">
-        <p className="text-blue-200 text-sm uppercase tracking-widest mb-3">Aplicar hoje em</p>
-        <div className="flex items-center gap-4">
-          <DayCircle day={dayNum} color="blue" size="lg"/>
+      {/* Position card */}
+      <div className="bg-gradient-to-br from-blue-500 to-med-primary rounded-3xl px-6 py-6 shadow-card2">
+        <p className="text-blue-200 text-sm uppercase tracking-widest mb-4 font-semibold">Aplicar hoje em</p>
+        <div className="flex items-center gap-5">
+          <DayCircle day={dayNum} color="blue" size="lg" ring={true}/>
           <div>
-            <p className="text-white text-2xl font-black leading-tight">{posInfo?.label}</p>
-            <span className="inline-block mt-1 bg-white/20 text-white text-sm font-bold px-3 py-0.5 rounded-full">
+            <p className="text-white text-3xl font-black leading-tight">{posInfo?.label}</p>
+            <span className="inline-block mt-2 bg-white/20 text-white text-base font-bold px-4 py-1 rounded-full">
               {nextPosition}
             </span>
           </div>
@@ -313,13 +286,13 @@ export default function Dashboard() {
 
       {/* Observations */}
       <div>
-        <label className="block text-med-muted text-sm font-semibold uppercase tracking-widest mb-2">
+        <label className="block text-med-muted text-sm font-bold uppercase tracking-widest mb-2">
           Observações (opcional)
         </label>
         <textarea
           value={observations} onChange={e => setObservations(e.target.value)}
           rows={2}
-          className="w-full bg-med-surface border border-med-border rounded-2xl px-4 py-3 text-med-text text-lg focus:outline-none focus:border-med-primary focus:shadow-blue-glow resize-none placeholder:text-med-faint transition-all shadow-card"
+          className="w-full bg-med-surface border border-med-border rounded-2xl px-4 py-4 text-med-text text-lg focus:outline-none focus:border-med-primary focus:shadow-blue-glow resize-none placeholder:text-med-faint transition-all shadow-card"
           placeholder="Ex: vermelhidão, trocar local..."
         />
       </div>
@@ -328,18 +301,23 @@ export default function Dashboard() {
       <button
         onClick={handleConfirm}
         disabled={confirming || !caregiver}
-        className="w-full bg-med-success hover:bg-green-700 disabled:bg-med-faint disabled:text-white text-white font-black text-2xl py-6 rounded-3xl transition-all shadow-card2 active:scale-[0.98]"
+        className="w-full bg-med-success hover:bg-green-700 disabled:bg-med-faint text-white font-black text-2xl py-7 rounded-3xl transition-all shadow-card2 active:scale-[0.97] select-none"
       >
         {confirming ? (
           <span className="flex items-center justify-center gap-3">
-            <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+            <span className="w-7 h-7 border-[3px] border-white border-t-transparent rounded-full animate-spin"/>
             Registrando...
           </span>
-        ) : '✓  CONFIRMAR APLICAÇÃO'}
+        ) : (
+          <span className="flex items-center justify-center gap-3">
+            <CheckCircle size={28} strokeWidth={2.5}/>
+            CONFIRMAR APLICAÇÃO
+          </span>
+        )}
       </button>
 
       {!caregiver && (
-        <p className="text-center text-amber-600 text-sm bg-amber-50 rounded-2xl p-3 border border-amber-200">
+        <p className="text-center text-amber-700 text-base bg-amber-50 rounded-2xl p-4 border border-amber-200 font-medium">
           Seu usuário não está vinculado a uma cuidadora. Peça ao administrador.
         </p>
       )}
@@ -348,14 +326,14 @@ export default function Dashboard() {
       {schedule.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <CalendarDays size={16} className="text-med-muted"/>
-            <p className="text-med-muted text-sm font-semibold uppercase tracking-widest">Próximas 12 aplicações</p>
+            <CalendarDays size={17} className="text-med-muted"/>
+            <p className="text-med-muted text-sm font-bold uppercase tracking-widest">Próximas 12 aplicações</p>
           </div>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2">
-            {schedule.map(({ dayName, day, month, position, dayNum, isToday }, i) => (
+            {schedule.map(({ dayName, day, month, dayNum, isToday }, i) => (
               <div key={i}
-                className={`shrink-0 w-[72px] rounded-2xl p-2.5 text-center border transition-colors shadow-card ${
-                  isToday ? 'bg-med-primary border-med-primary text-white' : 'bg-med-surface border-med-border'
+                className={`shrink-0 w-[76px] rounded-2xl p-3 text-center border transition-colors shadow-card ${
+                  isToday ? 'bg-med-primary border-med-primary' : 'bg-med-surface border-med-border'
                 }`}
               >
                 <p className={`text-xs font-bold uppercase ${isToday ? 'text-blue-200' : 'text-med-faint'}`}>{dayName}</p>
