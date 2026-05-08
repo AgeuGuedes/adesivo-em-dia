@@ -63,7 +63,7 @@ export default function Settings() {
   async function loadData() {
     const [{ data: pat }, { data: cgs }] = await Promise.all([
       supabase.from('patients').select('*').limit(1).maybeSingle(),
-      supabase.from('caregivers').select('*').order('name'),
+      supabase.from('caregivers').select('*').order('created_at', { ascending: true }),
     ])
     setPatient(pat)
     setPatientName(pat?.name || '')
