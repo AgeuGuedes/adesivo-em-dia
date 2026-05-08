@@ -13,7 +13,7 @@ function DayCircle({ day, color = 'blue', size = 'md', ring = false }) {
     ? 'bg-red-500 border-red-700 text-white shadow-md'
     : color === 'green'
     ? 'bg-med-success border-green-700 text-white shadow-md'
-    : 'bg-med-primary border-purple-700 text-white shadow-md'
+    : 'bg-med-primary border-med-primary-hover text-white shadow-md'
   return (
     <div className={`${sz} ${cls} rounded-full border-2 flex items-center justify-center font-black shrink-0 ${ring ? 'ring-2 ring-white ring-offset-1 ring-offset-med-primary' : ''}`}>
       {day}

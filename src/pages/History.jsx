@@ -58,7 +58,7 @@ export default function History() {
                     {info?.label || rec.position}
                   </p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <div className="w-7 h-7 rounded-full bg-med-primary border-2 border-purple-700 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-med-primary border-2 border-med-primary-hover flex items-center justify-center shrink-0">
                       <span className="text-white text-xs font-black">{dayNum}</span>
                     </div>
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-med-primary-light text-med-primary border border-purple-200">
