@@ -35,8 +35,8 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
     >
       <defs>
         <linearGradient id="bodyFill" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stopColor="#ede9fb"/>
-          <stop offset="100%" stopColor="#ddd3f7"/>
+          <stop offset="0%"   stopColor="#dde8f5"/>
+          <stop offset="100%" stopColor="#c8d8ee"/>
         </linearGradient>
         <filter id="glowBlue" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="4" result="b"/>
@@ -47,19 +47,19 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <filter id="bodyShadow" x="-10%" y="-5%" width="120%" height="110%">
-          <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#9a8dc8" floodOpacity="0.4"/>
+          <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#a0b4cc" floodOpacity="0.4"/>
         </filter>
       </defs>
 
       {/* Head */}
       <ellipse cx="150" cy="50" rx="30" ry="34"
-        fill="#ede9fb" stroke="#c4b4e8" strokeWidth="1.5" filter="url(#bodyShadow)"/>
-      <ellipse cx="120" cy="53" rx="5" ry="9" fill="#d8cef2" stroke="#c4b4e8" strokeWidth="1"/>
-      <ellipse cx="180" cy="53" rx="5" ry="9" fill="#d8cef2" stroke="#c4b4e8" strokeWidth="1"/>
+        fill="#dde8f5" stroke="#b0c4de" strokeWidth="1.5" filter="url(#bodyShadow)"/>
+      <ellipse cx="120" cy="53" rx="5" ry="9" fill="#ccd8ec" stroke="#b0c4de" strokeWidth="1"/>
+      <ellipse cx="180" cy="53" rx="5" ry="9" fill="#ccd8ec" stroke="#b0c4de" strokeWidth="1"/>
 
       {/* Neck */}
       <path d="M 140 82 C 138 91 136 103 136 111 L 164 111 C 164 103 162 91 160 82 Z"
-        fill="#d8cef2" stroke="#c4b4e8" strokeWidth="1"/>
+        fill="#ccd8ec" stroke="#b0c4de" strokeWidth="1"/>
 
       {/* Torso — lower section widened 20 px per side so all circles stay inside */}
       <path d="
@@ -84,20 +84,20 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
         C 276 192, 275 171, 263 155
         C 243 127, 192 113, 164 110
         Z"
-        fill="url(#bodyFill)" stroke="#c4b4e8" strokeWidth="1.5" filter="url(#bodyShadow)"/>
+        fill="url(#bodyFill)" stroke="#b0c4de" strokeWidth="1.5" filter="url(#bodyShadow)"/>
 
       {/* Shoulder blade hints */}
-      <ellipse cx="97"  cy="190" rx="26" ry="44" fill="#d4c8f0" opacity="0.45"/>
-      <ellipse cx="203" cy="190" rx="26" ry="44" fill="#d4c8f0" opacity="0.45"/>
+      <ellipse cx="97"  cy="190" rx="26" ry="44" fill="#c4d4e8" opacity="0.45"/>
+      <ellipse cx="203" cy="190" rx="26" ry="44" fill="#c4d4e8" opacity="0.45"/>
 
       {/* Spine */}
       <line x1="150" y1="114" x2="150" y2="386"
-        stroke="#b4a8d8" strokeWidth="1.2" strokeDasharray="5,5" opacity="0.6"/>
+        stroke="#9eb4cc" strokeWidth="1.2" strokeDasharray="5,5" opacity="0.6"/>
 
       {/* Horizontal dividers */}
       {[207, 287].map(y => (
         <line key={y} x1="50" y1={y} x2="250" y2={y}
-          stroke="#b4a8d8" strokeWidth="1" strokeDasharray="5,5" opacity="0.5"/>
+          stroke="#9eb4cc" strokeWidth="1" strokeDasharray="5,5" opacity="0.5"/>
       ))}
 
       {/* Row labels */}
@@ -108,14 +108,14 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
       ].map(({ x, y, t }) => (
         <text key={t} x={x} y={y} textAnchor="middle" fontSize="10"
           fontFamily="system-ui" letterSpacing="2"
-          fill="#9a8dc8" fontWeight="700">{t}</text>
+          fill="#8fa8c2" fontWeight="700">{t}</text>
       ))}
 
       {/* ESQ / DIR */}
       <text x="78"  y="420" textAnchor="middle" fontSize="13"
-        fontFamily="system-ui" fill="#8878c0" letterSpacing="0.5" fontWeight="700">← ESQ</text>
+        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="700">← ESQ</text>
       <text x="222" y="420" textAnchor="middle" fontSize="13"
-        fontFamily="system-ui" fill="#8878c0" letterSpacing="0.5" fontWeight="700">DIR →</text>
+        fontFamily="system-ui" fill="#7a96b0" letterSpacing="0.5" fontWeight="700">DIR →</text>
 
       {/* Circles */}
       {Object.entries(CIRCLES).map(([pos, { cx, cy }]) => {
@@ -143,7 +143,7 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
             <circle
               cx={cx} cy={cy} r={R}
               fill={isApplied ? '#ef4444' : isActive ? '#8C67D9' : '#ffffff'}
-              stroke={isApplied ? '#dc2626' : isActive ? '#7355b5' : '#c4b4e8'}
+              stroke={isApplied ? '#dc2626' : isActive ? '#7355b5' : '#b8cce0'}
               strokeWidth={isApplied || isActive ? 2.5 : 1.5}
               filter={isApplied ? 'url(#glowRed)' : isActive ? 'url(#glowBlue)' : undefined}
             />
@@ -157,7 +157,7 @@ export default function BackDiagram({ activePosition, appliedPosition }) {
 
             <text x={cx} y={cy + R + 14} textAnchor="middle"
               fontSize="9.5" fontWeight="700" fontFamily="system-ui"
-              fill={isApplied ? '#ef4444' : isActive ? '#8C67D9' : '#8878c0'}>
+              fill={isApplied ? '#ef4444' : isActive ? '#8C67D9' : '#7a96b0'}>
               {pos}
             </text>
           </g>
