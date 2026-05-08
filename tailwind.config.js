@@ -10,9 +10,9 @@ export default {
           elevated:  '#f8fafc',
           border:    '#e2e8f0',
           border2:   '#cbd5e1',
-          primary:   '#1d6ed8',
-          'primary-light': '#dbeafe',
-          'primary-hover': '#1558b0',
+          primary:   '#8C67D9',
+          'primary-light': '#ede9fb',
+          'primary-hover': '#7355b5',
           success:   '#059669',
           'success-light': '#d1fae5',
           danger:    '#dc2626',
@@ -27,7 +27,7 @@ export default {
       boxShadow: {
         card:  '0 1px 6px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05)',
         card2: '0 2px 12px rgba(0,0,0,0.10), 0 8px 24px rgba(0,0,0,0.06)',
-        'blue-glow': '0 0 0 3px rgba(29,110,216,0.18)',
+        'blue-glow': '0 0 0 3px rgba(140,103,217,0.18)',
       },
       keyframes: {
         slideUp: {

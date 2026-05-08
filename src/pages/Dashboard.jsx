@@ -13,7 +13,7 @@ function DayCircle({ day, color = 'blue', size = 'md', ring = false }) {
     ? 'bg-red-500 border-red-700 text-white shadow-md'
     : color === 'green'
     ? 'bg-med-success border-green-700 text-white shadow-md'
-    : 'bg-med-primary border-blue-700 text-white shadow-md'
+    : 'bg-med-primary border-purple-700 text-white shadow-md'
   return (
     <div className={`${sz} ${cls} rounded-full border-2 flex items-center justify-center font-black shrink-0 ${ring ? 'ring-2 ring-white ring-offset-1 ring-offset-med-primary' : ''}`}>
       {day}
@@ -179,6 +179,11 @@ export default function Dashboard() {
     return (
       <div className="p-5 max-w-lg mx-auto space-y-4 pb-28 animate-fadeIn">
 
+        {/* Header */}
+        <div className="py-1">
+          {patient && <p className="text-med-text font-black text-2xl leading-tight">{patient.name}</p>}
+        </div>
+
         {/* Confirmação */}
         <div className="bg-green-50 rounded-3xl p-5 border border-green-200 shadow-card2">
           <div className="flex items-center gap-4">
@@ -187,7 +192,7 @@ export default function Dashboard() {
             </div>
             <div>
               <h2 className="text-xl font-black text-med-success leading-tight">Adesivo aplicado!</h2>
-              <p className="text-green-700 text-base mt-0.5">{timeStr} · {todayRecord.caregivers?.name}</p>
+              <p className="text-green-700 text-base mt-0.5">{t.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · {timeStr} · {todayRecord.caregivers?.name}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-green-200">
@@ -266,8 +271,8 @@ export default function Dashboard() {
       </div>
 
       {/* Position card */}
-      <div className="bg-gradient-to-br from-blue-500 to-med-primary rounded-3xl px-6 py-6 shadow-card2">
-        <p className="text-blue-200 text-sm uppercase tracking-widest mb-4 font-semibold">Aplicar hoje em</p>
+      <div className="bg-gradient-to-br from-[#a07ee0] to-med-primary rounded-3xl px-6 py-6 shadow-card2">
+        <p className="text-purple-200 text-sm uppercase tracking-widest mb-4 font-semibold">Aplicar hoje em</p>
         <div className="flex items-center gap-5">
           <DayCircle day={dayNum} color="blue" size="lg" ring={true}/>
           <div>
@@ -336,7 +341,7 @@ export default function Dashboard() {
                   isToday ? 'bg-med-primary border-med-primary' : 'bg-med-surface border-med-border'
                 }`}
               >
-                <p className={`text-xs font-bold uppercase ${isToday ? 'text-blue-200' : 'text-med-faint'}`}>{dayName}</p>
+                <p className={`text-xs font-bold uppercase ${isToday ? 'text-purple-200' : 'text-med-faint'}`}>{dayName}</p>
                 <p className={`text-sm font-semibold mt-0.5 ${isToday ? 'text-white' : 'text-med-muted'}`}>{day}/{month}</p>
                 <p className={`text-sm font-black mt-1 ${isToday ? 'text-white' : 'text-med-primary'}`}>Dia {dayNum}</p>
               </div>

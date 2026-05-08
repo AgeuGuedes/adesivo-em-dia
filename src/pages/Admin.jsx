@@ -248,11 +248,11 @@ export default function Admin() {
       </div>
 
       {/* Status */}
-      <div className="bg-gradient-to-br from-blue-500 to-med-primary rounded-3xl px-5 py-5 text-white shadow-card2 flex items-center justify-between">
+      <div className="bg-gradient-to-br from-[#a07ee0] to-med-primary rounded-3xl px-5 py-5 text-white shadow-card2 flex items-center justify-between">
         <div>
-          <p className="text-blue-200 text-xs uppercase tracking-widest font-semibold">Próxima aplicação</p>
+          <p className="text-purple-200 text-xs uppercase tracking-widest font-semibold">Próxima aplicação</p>
           <p className="text-white text-2xl font-black mt-1">{nextInfo?.label}</p>
-          <p className="text-blue-200 text-sm mt-0.5">Dia {nextDay} · {nextPos}</p>
+          <p className="text-purple-200 text-sm mt-0.5">Dia {nextDay} · {nextPos}</p>
         </div>
         <div className="text-6xl font-black text-white/20 leading-none">{nextDay}</div>
       </div>
@@ -352,7 +352,7 @@ export default function Admin() {
                   <div key={rec.id}
                     className={`rounded-2xl border p-3.5 ${
                       isSystem ? 'bg-amber-50 border-amber-200' :
-                      i === 0  ? 'bg-blue-50 border-blue-200' :
+                      i === 0  ? 'bg-purple-50 border-purple-200' :
                                  'bg-white border-med-border'
                     }`}
                   >
@@ -362,7 +362,7 @@ export default function Admin() {
                           <span className="text-sm font-black text-med-primary">Dia {day}</span>
                           <span className="text-sm font-bold text-med-text">{rec.position}</span>
                           {isSystem && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Sistema</span>}
-                          {i === 0 && !isSystem && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">Último</span>}
+                          {i === 0 && !isSystem && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold">Último</span>}
                         </div>
                         <p className="text-med-faint text-xs mt-0.5">
                           {date} {time} · {rec.caregivers?.name || 'Sistema'}
@@ -388,7 +388,7 @@ export default function Admin() {
                       <div className="flex gap-1 shrink-0">
                         {!isSystem && (
                           <button onClick={() => startEdit(rec)}
-                            className="p-2 rounded-xl text-med-faint hover:text-med-primary hover:bg-blue-50 transition-colors">
+                            className="p-2 rounded-xl text-med-faint hover:text-med-primary hover:bg-purple-50 transition-colors">
                             <Edit3 size={14}/>
                           </button>
                         )}
