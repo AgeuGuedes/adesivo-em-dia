@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Lock, Mail, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -9,20 +9,39 @@ function FieldIcon({ icon: Icon }) {
 }
 
 export default function Login() {
-  const [view, setView]         = useState('login') // 'login' | 'forgot'
+  const [view, setView]         = useState('login')
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [remember, setRemember] = useState(false)
   const [error, setError]       = useState('')
   const [msg, setMsg]           = useState('')
   const [loading, setLoading]   = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('rememberedCredentials')
+    if (saved) {
+      const { email: e, password: p } = JSON.parse(saved)
+      setEmail(e)
+      setPassword(p)
+      setRemember(true)
+    }
+  }, [])
 
   function goTo(v) { setView(v); setError(''); setMsg('') }
 
   async function handleLogin(e) {
     e.preventDefault(); setError(''); setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError('Email ou senha incorretos.')
+    if (error) {
+      setError('Email ou senha incorretos.')
+    } else {
+      if (remember) {
+        localStorage.setItem('rememberedCredentials', JSON.stringify({ email, password }))
+      } else {
+        localStorage.removeItem('rememberedCredentials')
+      }
+    }
     setLoading(false)
   }
 
@@ -74,12 +93,32 @@ export default function Login() {
                   </button>
                 </div>
               </div>
-              <div className="flex justify-end -mt-2">
+
+              {/* Lembrar + Esqueci */}
+              <div className="flex items-center justify-between -mt-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <div
+                    onClick={() => setRemember(v => !v)}
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                      remember
+                        ? 'bg-med-primary border-med-primary'
+                        : 'bg-white border-med-border'
+                    }`}
+                  >
+                    {remember && (
+                      <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                        <path d="M1 4L4 7.5L10 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-med-muted text-sm font-medium">Lembrar acesso</span>
+                </label>
                 <button type="button" onClick={() => goTo('forgot')}
                   className="text-med-primary text-sm font-semibold hover:underline">
                   Esqueci minha senha
                 </button>
               </div>
+
               {error && <p className="bg-red-50 border border-red-200 rounded-2xl p-3 text-red-600 text-sm text-center font-medium">{error}</p>}
               <button type="submit" disabled={loading}
                 className="w-full bg-med-primary hover:bg-med-primary-hover disabled:bg-med-faint text-white font-bold text-xl py-5 rounded-2xl transition-all shadow-card active:scale-[0.98]">
