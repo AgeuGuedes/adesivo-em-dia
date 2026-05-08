@@ -19,7 +19,11 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(git commit -m 'Melhorias de UX/design: celebração, acessibilidade e polish visual *)"
+      "Bash(git commit -m 'Melhorias de UX/design: celebração, acessibilidade e polish visual *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://aksuogeqlhgzjukzeunl.supabase.co/rest/v1/patients\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrc3VvZ2VxbGhnemp1a3pldW5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNDk3NTUsImV4cCI6MjA5MzgyNTc1NX0.aWACnM76U-6i1BZZto66yBL7BcVeSEF8HKkt8gKFHOw\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrc3VvZ2VxbGhnemp1a3pldW5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNDk3NTUsImV4cCI6MjA5MzgyNTc1NX0.aWACnM76U-6i1BZZto66yBL7BcVeSEF8HKkt8gKFHOw\")",
+      "PowerShell(Copy-Item \"public\\\\icon3.png\" \"public\\\\icon2.png\" -Force)",
+      "PowerShell(Copy-Item \"public\\\\icon_roxo2.png\" \"public\\\\icon2.png\" -Force)",
+      "PowerShell(Copy-Item \"public\\\\op1_violeta.png\" \"public\\\\icon2.png\" -Force)"
     ]
   }
 }
