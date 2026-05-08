@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Lock, Mail, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 const inputCls = "w-full bg-med-elevated border border-med-border rounded-2xl pl-11 pr-4 py-4 text-med-text text-lg focus:outline-none focus:border-med-primary focus:shadow-blue-glow transition-all placeholder:text-med-faint"
@@ -12,6 +12,7 @@ export default function Login() {
   const [view, setView]         = useState('login') // 'login' | 'forgot'
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
   const [error, setError]       = useState('')
   const [msg, setMsg]           = useState('')
   const [loading, setLoading]   = useState(false)
@@ -57,7 +58,7 @@ export default function Login() {
                 <label className="block text-med-muted text-sm font-semibold uppercase tracking-widest mb-2">Email</label>
                 <div className="relative">
                   <FieldIcon icon={Mail}/>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                  <input type="email" name="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required
                     className={inputCls} placeholder="seu@email.com"/>
                 </div>
               </div>
@@ -65,8 +66,12 @@ export default function Login() {
                 <label className="block text-med-muted text-sm font-semibold uppercase tracking-widest mb-2">Senha</label>
                 <div className="relative">
                   <FieldIcon icon={Lock}/>
-                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                  <input type={showPass ? 'text' : 'password'} name="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required
                     className={inputCls} placeholder="••••••••"/>
+                  <button type="button" onClick={() => setShowPass(v => !v)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-med-faint hover:text-med-muted transition-colors">
+                    {showPass ? <EyeOff size={18}/> : <Eye size={18}/>}
+                  </button>
                 </div>
               </div>
               <div className="flex justify-end -mt-2">
