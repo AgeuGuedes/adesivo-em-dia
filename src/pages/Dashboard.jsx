@@ -213,17 +213,10 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Detalhes */}
-        <button onClick={() => setShowDetails(v => !v)}
-          className="w-full flex items-center justify-between bg-med-surface border border-med-border rounded-2xl px-5 py-4 shadow-card transition-colors hover:bg-med-elevated active:scale-[0.98]">
-          <span className="text-med-text font-semibold text-base">Ver detalhes da aplicação</span>
-          {showDetails ? <ChevronUp size={18} className="text-med-muted"/> : <ChevronDown size={18} className="text-med-muted"/>}
-        </button>
-        {showDetails && (
-          <div className="bg-med-surface rounded-3xl py-4 px-3 shadow-card border border-med-border animate-fadeIn">
-            <BackDiagram appliedPosition={todayRecord.position}/>
-          </div>
-        )}
+        {/* Diagrama */}
+        <div className="bg-med-surface rounded-3xl py-4 px-3 shadow-card border border-med-border">
+          <BackDiagram appliedPosition={todayRecord.position}/>
+        </div>
 
         {/* Próxima aplicação — card unificado */}
         <div className="bg-med-surface rounded-3xl p-6 border border-med-border shadow-card space-y-4">
