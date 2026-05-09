@@ -102,7 +102,8 @@ export default function Dashboard() {
   const [todayDone, setTodayDone]       = useState(false)
   const [todayRecord, setTodayRecord]   = useState(null)
   const [loading, setLoading]           = useState(true)
-  const [showDetails, setShowDetails]   = useState(false)
+  const [showDetails, setShowDetails]       = useState(false)
+  const [showLastDetails, setShowLastDetails] = useState(false)
 
   useEffect(() => { loadData() }, [])
 
@@ -110,7 +111,7 @@ export default function Dashboard() {
     setLoading(true)
     const [{ data: pat }, { data: last }] = await Promise.all([
       supabase.from('patients').select('*').limit(1).maybeSingle(),
-      supabase.from('applications').select('*').order('applied_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('applications').select('*, caregivers(name)').order('applied_at', { ascending: false }).limit(1).maybeSingle(),
     ])
     setPatient(pat)
     setLastApplication(last)
@@ -329,6 +330,72 @@ export default function Dashboard() {
           Seu usuário não está vinculado a uma cuidadora. Peça ao administrador.
         </p>
       )}
+
+      {/* Próxima aplicação recomendada */}
+      {lastApplication && (() => {
+        const lastT       = new Date(lastApplication.applied_at)
+        const nextT       = new Date(lastT.getTime() + 24 * 60 * 60 * 1000)
+        const nextTimeStr = nextT.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        const nextDateStr = nextT.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+        const nextDateCap = nextDateStr.charAt(0).toUpperCase() + nextDateStr.slice(1)
+        return (
+          <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-3">
+            <div>
+              <p className="text-med-faint text-xs uppercase tracking-widest font-semibold mb-1">Próxima aplicação</p>
+              <p className="text-med-text text-4xl font-black leading-none tracking-tight">{nextTimeStr}</p>
+              <p className="text-med-muted text-sm mt-1.5">{nextDateCap}</p>
+            </div>
+            <div className="border-t border-med-border pt-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <DayCircle day={dayNum} color="blue" size="sm"/>
+                <div>
+                  <p className="text-med-faint text-xs uppercase tracking-widest font-semibold">Local</p>
+                  <p className="text-med-text font-bold text-lg leading-tight">
+                    {posInfo?.label}
+                    <span className="ml-2 text-med-primary text-sm font-semibold">{nextPosition}</span>
+                  </p>
+                </div>
+              </div>
+              <CountdownCompact appliedAt={lastApplication.applied_at}/>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Última aplicação expandível */}
+      {lastApplication && (() => {
+        const lastInfo = POSITION_LABELS[lastApplication.position]
+        const lastDay  = POSITION_DAY[lastApplication.position]
+        const lastT    = new Date(lastApplication.applied_at)
+        const lastTime = lastT.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        const lastDate = lastT.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+        return (
+          <>
+            <button onClick={() => setShowLastDetails(v => !v)}
+              className="w-full flex items-center justify-between bg-med-surface border border-med-border rounded-2xl px-5 py-4 shadow-card hover:bg-med-elevated transition-colors active:scale-[0.98]">
+              <span className="text-med-text font-semibold text-base">Última aplicação</span>
+              {showLastDetails ? <ChevronUp size={18} className="text-med-muted"/> : <ChevronDown size={18} className="text-med-muted"/>}
+            </button>
+            {showLastDetails && (
+              <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-4 animate-fadeIn">
+                <div className="flex items-center gap-3">
+                  <DayCircle day={lastDay} color="red" size="sm"/>
+                  <div>
+                    <p className="text-med-text font-bold text-lg leading-tight">
+                      {lastInfo?.label}
+                      <span className="ml-2 text-red-400 text-sm font-semibold">{lastApplication.position}</span>
+                    </p>
+                    <p className="text-med-muted text-sm mt-0.5">
+                      {lastDate} · {lastTime} · {lastApplication.caregivers?.name}
+                    </p>
+                  </div>
+                </div>
+                <BackDiagram appliedPosition={lastApplication.position}/>
+              </div>
+            )}
+          </>
+        )
+      })()}
 
       {/* Schedule strip */}
       {schedule.length > 0 && (
