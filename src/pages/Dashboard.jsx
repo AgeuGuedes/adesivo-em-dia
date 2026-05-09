@@ -269,7 +269,7 @@ export default function Dashboard() {
         <button onClick={() => setTodayDone(false)}
           className="w-full py-4 rounded-2xl border border-med-border text-med-muted text-base font-semibold hover:bg-med-elevated transition-colors bg-med-surface shadow-card flex items-center justify-center gap-2 active:scale-[0.98]">
           <RotateCcw size={16}/>
-          Voltar ao início
+          Próxima aplicação
         </button>
       </div>
     )
