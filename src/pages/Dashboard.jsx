@@ -259,19 +259,9 @@ export default function Dashboard() {
     <div className="p-5 max-w-lg mx-auto space-y-4 pb-28 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex items-center justify-between py-1">
-        <div>
-          {patient && <p className="text-med-text font-black text-2xl leading-tight">{patient.name}</p>}
-          <p className="text-med-muted text-base mt-0.5">{todayCap}</p>
-        </div>
-        {lastApplication && (
-          <div className="text-right bg-med-surface border border-med-border rounded-2xl px-3 py-2 shadow-card">
-            <p className="text-med-faint text-xs uppercase tracking-wider font-semibold">Último</p>
-            <p className="text-med-text text-sm font-bold mt-0.5">
-              Dia {POSITION_DAY[lastApplication.position]} · {lastApplication.position}
-            </p>
-          </div>
-        )}
+      <div className="py-1">
+        {patient && <p className="text-med-text font-black text-2xl leading-tight">{patient.name}</p>}
+        <p className="text-med-muted text-base mt-0.5">{todayCap}</p>
       </div>
 
       {/* Position card */}
@@ -286,6 +276,16 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
+        {lastApplication && (() => {
+          const nextT       = new Date(new Date(lastApplication.applied_at).getTime() + 24 * 60 * 60 * 1000)
+          const nextTimeStr = nextT.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          return (
+            <div className="mt-4 pt-4 border-t border-white/20 flex items-center gap-2">
+              <Clock size={14} className="text-purple-200 shrink-0"/>
+              <p className="text-purple-200 text-sm font-medium">Ideal hoje às {nextTimeStr}</p>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Back diagram */}
@@ -331,37 +331,6 @@ export default function Dashboard() {
         </p>
       )}
 
-      {/* Próxima aplicação recomendada */}
-      {lastApplication && (() => {
-        const lastT       = new Date(lastApplication.applied_at)
-        const nextT       = new Date(lastT.getTime() + 24 * 60 * 60 * 1000)
-        const nextTimeStr = nextT.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        const nextDateStr = nextT.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-        const nextDateCap = nextDateStr.charAt(0).toUpperCase() + nextDateStr.slice(1)
-        return (
-          <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-3">
-            <div>
-              <p className="text-med-faint text-xs uppercase tracking-widest font-semibold mb-1">Próxima aplicação</p>
-              <p className="text-med-text text-4xl font-black leading-none tracking-tight">{nextTimeStr}</p>
-              <p className="text-med-muted text-sm mt-1.5">{nextDateCap}</p>
-            </div>
-            <div className="border-t border-med-border pt-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <DayCircle day={dayNum} color="blue" size="sm"/>
-                <div>
-                  <p className="text-med-faint text-xs uppercase tracking-widest font-semibold">Local</p>
-                  <p className="text-med-text font-bold text-lg leading-tight">
-                    {posInfo?.label}
-                    <span className="ml-2 text-med-primary text-sm font-semibold">{nextPosition}</span>
-                  </p>
-                </div>
-              </div>
-              <CountdownCompact appliedAt={lastApplication.applied_at}/>
-            </div>
-          </div>
-        )
-      })()}
-
       {/* Última aplicação expandível */}
       {lastApplication && (() => {
         const lastInfo = POSITION_LABELS[lastApplication.position]
@@ -373,8 +342,11 @@ export default function Dashboard() {
           <>
             <button onClick={() => setShowLastDetails(v => !v)}
               className="w-full flex items-center justify-between bg-med-surface border border-med-border rounded-2xl px-5 py-4 shadow-card hover:bg-med-elevated transition-colors active:scale-[0.98]">
-              <span className="text-med-text font-semibold text-base">Última aplicação</span>
-              {showLastDetails ? <ChevronUp size={18} className="text-med-muted"/> : <ChevronDown size={18} className="text-med-muted"/>}
+              <div className="text-left">
+                <p className="text-med-text font-semibold text-base">Última aplicação</p>
+                <p className="text-med-faint text-sm mt-0.5">{lastInfo?.label} · {lastApplication.position} · Dia {lastDay}</p>
+              </div>
+              {showLastDetails ? <ChevronUp size={18} className="text-med-muted shrink-0"/> : <ChevronDown size={18} className="text-med-muted shrink-0"/>}
             </button>
             {showLastDetails && (
               <div className="bg-med-surface rounded-3xl p-5 border border-med-border shadow-card space-y-4 animate-fadeIn">
