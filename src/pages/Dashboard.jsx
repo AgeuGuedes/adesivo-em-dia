@@ -287,7 +287,7 @@ export default function Dashboard() {
 
       {/* Position card */}
       <div className="bg-gradient-to-br from-[#a07ee0] to-med-primary rounded-3xl px-6 py-6 shadow-card2">
-        <p className="text-purple-200 text-sm uppercase tracking-widest mb-4 font-semibold">Aplicar hoje em</p>
+        <p className="text-purple-200 text-sm uppercase tracking-widest mb-4 font-semibold">{todayRecord ? 'Aplicar amanhã em' : 'Aplicar hoje em'}</p>
         <div className="flex items-center gap-5">
           <DayCircle day={dayNum} color="blue" size="lg" ring={true}/>
           <div>
