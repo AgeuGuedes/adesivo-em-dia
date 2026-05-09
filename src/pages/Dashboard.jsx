@@ -116,12 +116,14 @@ export default function Dashboard() {
     setLastApplication(last)
     setNextPosition(getNextPosition(last?.position))
 
-    const today = new Date().toISOString().split('T')[0]
+    const now        = new Date()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString()
+    const todayEnd   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString()
     const { data: todayApp } = await supabase
       .from('applications')
       .select('*, caregivers(name)')
-      .gte('applied_at', today + 'T00:00:00')
-      .lte('applied_at', today + 'T23:59:59')
+      .gte('applied_at', todayStart)
+      .lte('applied_at', todayEnd)
       .order('applied_at', { ascending: false })
       .limit(1).maybeSingle()
 
