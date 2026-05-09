@@ -21,6 +21,27 @@ function DayCircle({ day, color = 'blue', size = 'md', ring = false }) {
   )
 }
 
+function IdealCountdown({ appliedAt }) {
+  const [left, setLeft] = useState({ h: 0, m: 0, past: false })
+
+  useEffect(() => {
+    const target = new Date(appliedAt).getTime() + 24 * 60 * 60 * 1000
+    function tick() {
+      const diff = target - Date.now()
+      if (diff <= 0) { setLeft({ h: 0, m: 0, past: true }); return }
+      setLeft({ h: Math.floor(diff / 3600000), m: Math.floor((diff % 3600000) / 60000), past: false })
+    }
+    tick()
+    const id = setInterval(tick, 60000)
+    return () => clearInterval(id)
+  }, [appliedAt])
+
+  if (left.past) return <span className="text-white font-bold">Agora!</span>
+  const txt = left.h > 0 ? `Faltam ${left.h}h ${String(left.m).padStart(2,'0')}min` : `Faltam ${left.m}min`
+  const cls = left.h < 2 ? 'text-red-300' : left.h < 6 ? 'text-amber-300' : 'text-purple-200'
+  return <span className={`font-semibold ${cls}`}>{txt}</span>
+}
+
 function CountdownCompact({ appliedAt }) {
   const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
 
@@ -280,9 +301,9 @@ export default function Dashboard() {
           const nextT       = new Date(new Date(lastApplication.applied_at).getTime() + 24 * 60 * 60 * 1000)
           const nextTimeStr = nextT.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
           return (
-            <div className="mt-4 pt-4 border-t border-white/20 flex items-center gap-2">
+            <div className="mt-4 pt-4 border-t border-white/20 flex items-center gap-2 flex-wrap">
               <Clock size={14} className="text-purple-200 shrink-0"/>
-              <p className="text-purple-200 text-sm font-medium">Ideal hoje às {nextTimeStr}</p>
+              <p className="text-purple-200 text-sm font-medium">Ideal às {nextTimeStr} · <IdealCountdown appliedAt={lastApplication.applied_at}/></p>
             </div>
           )
         })()}
